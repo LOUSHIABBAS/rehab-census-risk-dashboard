@@ -4,19 +4,25 @@ import { listOpenRiskFlags } from "@/lib/db/queries/riskFlags";
 
 export async function GET() {
   try {
-    const [facilities, openFlags] = await Promise.all([
-      getFacilityCensus(),
-      listOpenRiskFlags(),
-    ]);
+    // Lazy import: avoid constructing the Prisma adapter at build time.
+    // CI doesn't have DATABASE_URL, so eager imports crash 'next build'.
+    const { getFacilityCensus } = await import("@/lib/db/queries/facilities");
+    const { listOpenRiskFlags } = await import("@/lib/db/queries/riskFlags");
 
-    return NextResponse.json({
+    const facilities = await getFacilityCensus();
+    const openRiskFlags = await listOpenRiskFlags();
+
+    return Response.json({
       status: "ok",
       facilities: facilities.length,
-      openRiskFlags: openFlags.length,
+      openRiskFlags: openRiskFlags.length,
       sampleFacility: facilities[0] ?? null,
     });
-  } catch (err) {
-    console.error("[health/db]", err);
-    return NextResponse.json({ status: "error", error: "Database query failed" }, { status: 500 });
+  } catch (error) {
+    console.error("DB health check failed:", error);
+    return Response.json(
+      { status: "error", error: "Database unreachable" },
+      { status: 500 }
+    );
   }
 }
