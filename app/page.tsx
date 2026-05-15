@@ -1,12 +1,18 @@
 export const dynamic = "force-dynamic";
 
-import { getDashboardStats, getFacilityCensus } from "@/lib/db/queries/facilities";
+import type { FacilityCensusRow, DashboardStats } from "@/lib/db/queries/facilities";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { FacilityCard } from "@/components/dashboard/FacilityCard";
 import { OccupancyChart } from "@/components/charts/OccupancyChart";
 
 export default async function Home() {
-  const [stats, census] = await Promise.all([
+  // Lazy imports prevent Prisma adapter construction at build time.
+  // CI has no DATABASE_URL, so eager module-level imports would crash next build.
+  const { getDashboardStats, getFacilityCensus } = await import(
+    "@/lib/db/queries/facilities"
+  );
+
+  const [stats, census]: [DashboardStats, FacilityCensusRow[]] = await Promise.all([
     getDashboardStats(),
     getFacilityCensus(),
   ]);
