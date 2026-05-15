@@ -16,7 +16,7 @@ A Next.js dashboard that ingests synthetic rehab facility data (modeled on Kipu 
   - shadcn/ui (see `components.json` for current preset/style)
   - Tailwind CSS v4 (CSS-based config in `app/globals.css`, no `tailwind.config.ts`)
   - Recharts
-- **Database:** Azure SQL (Serverless tier). Use the `mssql` driver via Drizzle ORM.
+- **Database:** Azure SQL (Serverless tier). Prisma ORM (`@prisma/client`) with the `sqlserver` provider.
 - **AI Layer:** AWS Bedrock SDK, calling Claude Sonnet via `@aws-sdk/client-bedrock-runtime`
 - **Validation:** Zod for all API input/output
 - **Package manager:** pnpm
@@ -68,7 +68,7 @@ charts/                 # Recharts wrappers
 dashboard/              # Domain components
 lib/
 db/
-schema.ts             # Drizzle schema
+client.ts             # Prisma client singleton (imported from @prisma/client)
 queries/              # Typed query functions
 seed.ts               # Synthetic data generator
 bedrock/
@@ -77,6 +77,9 @@ prompts/              # Prompt templates
 phi/
 deidentify.ts         # PHI stripping
 schemas/                # Zod validation schemas
+prisma/
+schema.prisma           # Prisma schema (Facility, Patient, Encounter, RiskFlag)
+migrations/             # Generated SQL Server DDL migrations
 
 
 ## Working Agreements with Claude Code
