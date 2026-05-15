@@ -1,7 +1,3 @@
-import { NextResponse } from "next/server";
-import { getFacilityCensus } from "@/lib/db/queries/facilities";
-import { listOpenRiskFlags } from "@/lib/db/queries/riskFlags";
-
 export async function GET() {
   try {
     // Lazy import: avoid constructing the Prisma adapter at build time.
