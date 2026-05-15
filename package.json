@@ -7,15 +7,20 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/adapter-mssql": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.16.0",
     "mssql": "^12.5.3",
+    "nanoid": "^5.1.11",
     "next": "16.2.6",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
@@ -30,15 +35,13 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/mssql": "^12.3.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "prisma": "^7.8.0",
     "tailwindcss": "^4",
-    "tsx": "^4.22.0",
     "typescript": "^5"
   }
 }

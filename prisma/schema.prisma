@@ -1,0 +1,100 @@
+// Prisma schema for Rehab Census & Risk Dashboard
+// Dialect: SQL Server (Azure SQL Serverless)
+// Enum-ish fields use String — allowed values are documented via /// comments and
+// enforced at the application layer via Zod (see lib/schemas/enums.ts).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+// ---------------------------------------------------------------------------
+// Facility
+// ---------------------------------------------------------------------------
+
+model Facility {
+  id       String @id @db.NVarChar(64)
+  name     String @db.NVarChar(200)
+  address  String @db.NVarChar(500)
+  capacity Int
+
+  /// Allowed values: detox | residential | php | iop | op
+  levelOfCare String   @db.NVarChar(20)
+  createdAt   DateTime @default(now())
+
+  patients Patient[]
+
+  @@map("facilities")
+}
+
+// ---------------------------------------------------------------------------
+// Patient — synthetic only, no PHI fields (no name, DOB, MRN, SSN, address, phone)
+// ---------------------------------------------------------------------------
+
+model Patient {
+  id            String    @id @db.NVarChar(64)
+  facilityId    String    @db.NVarChar(64)
+  admissionDate DateTime  @db.Date
+  dischargeDate DateTime? @db.Date
+
+  /// Allowed values: detox | residential | php | iop | op
+  levelOfCare String @db.NVarChar(20)
+
+  /// ICD-10 format, e.g. F11.20
+  primaryDiagnosisCode   String    @db.NVarChar(20)
+  insurancePayer         String    @db.NVarChar(100)
+  insuranceAuthExpiresAt DateTime? @db.Date
+  createdAt              DateTime  @default(now())
+
+  facility   Facility    @relation(fields: [facilityId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  encounters Encounter[]
+  riskFlags  RiskFlag[]
+
+  @@map("patients")
+}
+
+// ---------------------------------------------------------------------------
+// Encounter
+// ---------------------------------------------------------------------------
+
+model Encounter {
+  id            String   @id @db.NVarChar(64)
+  patientId     String   @db.NVarChar(64)
+  encounterDate DateTime
+
+  /// Allowed values: group | individual | ua | medical | family
+  encounterType String   @db.NVarChar(20)
+  attended      Boolean  @default(true)
+  notes         String?  @db.NVarChar(2000)
+  createdAt     DateTime @default(now())
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("encounters")
+}
+
+// ---------------------------------------------------------------------------
+// RiskFlag
+// ---------------------------------------------------------------------------
+
+model RiskFlag {
+  id        String    @id @db.NVarChar(64)
+  patientId String    @db.NVarChar(64)
+
+  /// Allowed values: ama_risk | auth_lapse | missed_groups | failed_ua | no_aftercare
+  flagType String @db.NVarChar(30)
+
+  /// Allowed values: low | medium | high
+  severity   String    @db.NVarChar(20)
+  resolved   Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("risk_flags")
+}
