@@ -17,6 +17,7 @@ A Next.js dashboard that ingests synthetic rehab facility data (modeled on Kipu 
   - Tailwind CSS v4 (CSS-based config in `app/globals.css`, no `tailwind.config.ts`)
   - Recharts
 - **Database:** Azure SQL (Serverless tier). Prisma ORM (`@prisma/client`) with the `sqlserver` provider.
+  - **Migration note:** `prisma migrate deploy` doesn't work with Prisma 7 + `@prisma/adapter-mssql` — it bypasses the driver adapter and fails with P1001. Instead: generate new migrations with `prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script`, then apply with `tsx scripts/apply-migration.ts` which runs the SQL via `prisma.$executeRawUnsafe()`.
 - **AI Layer:** AWS Bedrock SDK, calling Claude Sonnet via `@aws-sdk/client-bedrock-runtime`
 - **Validation:** Zod for all API input/output
 - **Package manager:** pnpm

@@ -11,7 +11,10 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "postinstall": "prisma generate",
-    "seed:json": "tsx scripts/seed-to-json.ts"
+    "seed:json": "tsx scripts/seed-to-json.ts",
+    "seed:db": "tsx scripts/seed-db.ts",
+    "db:check": "tsx scripts/check-tables.ts",
+    "db:reset": "tsx scripts/reset-dev-db.ts"
   },
   "dependencies": {
     "@prisma/adapter-mssql": "^7.8.0",
