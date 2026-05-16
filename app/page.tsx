@@ -4,6 +4,7 @@ import type { FacilityCensusRow, DashboardStats } from "@/lib/db/queries/facilit
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { FacilityCard } from "@/components/dashboard/FacilityCard";
 import { OccupancyChart } from "@/components/charts/OccupancyChart";
+import { DailyBriefingCard } from "@/components/dashboard/DailyBriefingCard";
 
 export default async function Home() {
   // Lazy imports prevent Prisma adapter construction at build time.
@@ -27,6 +28,8 @@ export default async function Home() {
           Synthetic data — no real PHI. Built with Claude Code.
         </p>
       </div>
+
+      <DailyBriefingCard />
 
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
