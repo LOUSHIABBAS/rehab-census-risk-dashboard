@@ -117,6 +117,13 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Teal accent — single accent color used for CTAs, focus rings, active states, card borders */
+:root {
+  --accent-brand: oklch(0.511 0.126 181.9);        /* teal-600 #0d9488 */
+  --accent-brand-foreground: oklch(1 0 0);          /* white text on teal */
+  --accent-brand-subtle: oklch(0.953 0.051 181.9);  /* teal-50 for hover tints */
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -126,5 +133,15 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Typography utilities */
+@layer utilities {
+  .page-h1 {
+    @apply text-3xl md:text-4xl font-bold tracking-tight;
+  }
+  .page-subtitle {
+    @apply text-sm text-muted-foreground text-pretty;
   }
 }

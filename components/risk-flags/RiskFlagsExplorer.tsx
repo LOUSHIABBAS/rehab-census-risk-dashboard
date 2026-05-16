@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 import { SeverityDot } from "@/components/risk-flags/SeverityDot";
 import { FlagTypeLabel } from "@/components/risk-flags/FlagTypeLabel";
 import { UrNoteSheet } from "@/components/risk-flags/UrNoteSheet";
@@ -152,13 +153,22 @@ export function RiskFlagsExplorer({ flags, facilities }: Props) {
             onValueChange={handleSeverityChange}
             className="gap-1"
           >
-            <ToggleGroupItem value="high" className="text-xs px-3 data-[state=on]:bg-red-100 data-[state=on]:text-red-700">
+            <ToggleGroupItem
+              value="high"
+              className="cursor-pointer text-xs px-3 border border-input bg-background text-foreground data-[state=on]:bg-red-100 data-[state=on]:text-red-700 data-[state=on]:border-red-200"
+            >
               High
             </ToggleGroupItem>
-            <ToggleGroupItem value="medium" className="text-xs px-3 data-[state=on]:bg-amber-100 data-[state=on]:text-amber-700">
+            <ToggleGroupItem
+              value="medium"
+              className="cursor-pointer text-xs px-3 border border-input bg-background text-foreground data-[state=on]:bg-amber-100 data-[state=on]:text-amber-700 data-[state=on]:border-amber-200"
+            >
               Medium
             </ToggleGroupItem>
-            <ToggleGroupItem value="low" className="text-xs px-3 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-600">
+            <ToggleGroupItem
+              value="low"
+              className="cursor-pointer text-xs px-3 border border-input bg-background text-foreground data-[state=on]:bg-slate-100 data-[state=on]:text-slate-600 data-[state=on]:border-slate-300"
+            >
               Low
             </ToggleGroupItem>
           </ToggleGroup>
@@ -181,10 +191,10 @@ export function RiskFlagsExplorer({ flags, facilities }: Props) {
                 <button
                   key={t}
                   onClick={() => handleTypeChange(t)}
-                  className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                  className={`cursor-pointer rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
                     active
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-muted-foreground/30 text-muted-foreground hover:border-foreground/50"
+                      ? "border-foreground bg-foreground text-background shadow-sm"
+                      : "border-slate-300 bg-background text-slate-700 hover:bg-slate-100"
                   }`}
                 >
                   {labels[t]}
@@ -199,6 +209,15 @@ export function RiskFlagsExplorer({ flags, facilities }: Props) {
             Clear filters
           </Button>
         )}
+      </div>
+
+      {/* Summary chip */}
+      <div className="flex justify-end">
+        <p className="text-xs text-muted-foreground tabular-nums">
+          {sorted.length} flag{sorted.length !== 1 ? "s" : ""}
+          {" · "}
+          {sorted.filter((f) => f.flagType === "auth_lapse").length} require UR action
+        </p>
       </div>
 
       {/* Table */}
@@ -243,7 +262,7 @@ export function RiskFlagsExplorer({ flags, facilities }: Props) {
             </TableHeader>
             <TableBody>
               {sorted.map((flag) => (
-                <TableRow key={flag.id} className="hover:bg-muted/50">
+                <TableRow key={flag.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
                   <TableCell>
                     <SeverityDot severity={flag.severity} />
                   </TableCell>
@@ -264,12 +283,15 @@ export function RiskFlagsExplorer({ flags, facilities }: Props) {
                   </TableCell>
                   <TableCell className="text-right">
                     {flag.flagType === "auth_lapse" && (
-                      <button
+                      <Button
+                        size="sm"
+                        variant="secondary"
                         onClick={() => setSelectedPatientId(flag.patient.id)}
-                        className="text-xs text-primary underline-offset-2 hover:underline"
+                        className="h-7 gap-1.5 text-xs text-teal-700 border border-teal-300 hover:bg-teal-50"
                       >
+                        <FileText className="h-3 w-3" />
                         Draft UR Note
-                      </button>
+                      </Button>
                     )}
                   </TableCell>
                 </TableRow>

@@ -1,10 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import type { FacilityCensusRow, DashboardStats } from "@/lib/db/queries/facilities";
+import type { OpenRiskFlagRow } from "@/lib/db/queries/riskFlags";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { FacilityCard } from "@/components/dashboard/FacilityCard";
 import { OccupancyChart } from "@/components/charts/OccupancyChart";
 import { DailyBriefingCard } from "@/components/dashboard/DailyBriefingCard";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
 
 export default async function Home() {
   // Lazy imports prevent Prisma adapter construction at build time.
@@ -12,19 +14,18 @@ export default async function Home() {
   const { getDashboardStats, getFacilityCensus } = await import(
     "@/lib/db/queries/facilities"
   );
+  const { listOpenRiskFlags } = await import("@/lib/db/queries/riskFlags");
 
-  const [stats, census]: [DashboardStats, FacilityCensusRow[]] = await Promise.all([
-    getDashboardStats(),
-    getFacilityCensus(),
-  ]);
+  const [stats, census, allFlags]: [DashboardStats, FacilityCensusRow[], OpenRiskFlagRow[]] =
+    await Promise.all([getDashboardStats(), getFacilityCensus(), listOpenRiskFlags()]);
 
   return (
     <main className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="page-h1">
           Rehab Census &amp; Risk Dashboard
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 page-subtitle">
           Synthetic data — no real PHI. Built with Claude Code.
         </p>
       </div>
@@ -57,6 +58,8 @@ export default async function Home() {
         </div>
         <OccupancyChart data={census} />
       </div>
+
+      <RecentActivity flags={allFlags.slice(0, 5)} />
     </main>
   );
 }
