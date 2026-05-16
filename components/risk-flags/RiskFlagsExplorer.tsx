@@ -14,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { SeverityDot } from "@/components/risk-flags/SeverityDot";
 import { FlagTypeLabel } from "@/components/risk-flags/FlagTypeLabel";
+import { UrNoteSheet } from "@/components/risk-flags/UrNoteSheet";
 import { formatDaysOpen, formatShortDate } from "@/lib/utils";
 import type { OpenRiskFlagRow } from "@/lib/db/queries/riskFlags";
 
@@ -49,6 +50,7 @@ export function RiskFlagsExplorer({ flags, facilities }: Props) {
 
   const [sortKey, setSortKey] = useState<SortKey>("severity");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
   const updateParams = useCallback(
     (updates: Record<string, string | null>) => {
@@ -236,6 +238,7 @@ export function RiskFlagsExplorer({ flags, facilities }: Props) {
                   Created
                   <ChevronIcon dir={sortDir} active={sortKey === "createdAt"} />
                 </TableHead>
+                <TableHead className="w-32" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -259,11 +262,29 @@ export function RiskFlagsExplorer({ flags, facilities }: Props) {
                   <TableCell className="text-sm text-muted-foreground">
                     {formatShortDate(flag.createdAt)}
                   </TableCell>
+                  <TableCell className="text-right">
+                    {flag.flagType === "auth_lapse" && (
+                      <button
+                        onClick={() => setSelectedPatientId(flag.patient.id)}
+                        className="text-xs text-primary underline-offset-2 hover:underline"
+                      >
+                        Draft UR Note
+                      </button>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
+      )}
+
+      {selectedPatientId && (
+        <UrNoteSheet
+          patientId={selectedPatientId}
+          open={selectedPatientId !== null}
+          onClose={() => setSelectedPatientId(null)}
+        />
       )}
     </div>
   );

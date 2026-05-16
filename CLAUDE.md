@@ -22,6 +22,18 @@ A Next.js dashboard that ingests synthetic rehab facility data (modeled on Kipu 
 - **Validation:** Zod for all API input/output
 - **Package manager:** pnpm
 
+### Known pnpm + Turbopack resolution bug
+
+shadcn components that depend on `@radix-ui/react-dialog` (Sheet, AlertDialog, Dialog, Combobox) fail to build with:
+
+```
+Module not found: Can't resolve '@radix-ui/react-dismissable-layer'
+```
+
+Root cause: pnpm's isolated linker doesn't hoist `@radix-ui/react-dismissable-layer` to where Turbopack resolves it from inside `react-dialog`'s `.mjs` bundle. Explicit `pnpm add @radix-ui/react-dismissable-layer` and `.npmrc` hoist patterns both fail to fix it.
+
+**Workaround:** Replace the affected shadcn component with a custom implementation using native HTML elements + Tailwind. For modal/drawer patterns, implement `role="dialog"`, `aria-modal`, focus-trap, and focus-restoration manually (see `components/risk-flags/UrNoteSheet.tsx` for the reference implementation). For simple selects, use a native `<select>` (see `components/risk-flags/RiskFlagsExplorer.tsx`).
+
 ## Domain Model (Kipu-inspired, synthetic only)
 
 This project uses **synthetic data only**. No real PHI ever enters this codebase.
