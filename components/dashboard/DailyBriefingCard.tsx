@@ -66,7 +66,7 @@ export function DailyBriefingCard() {
     .filter((l) => l.startsWith("•"));
 
   return (
-    <Card className="border-l-4 border-l-primary/60 bg-gradient-to-br from-background to-muted/30">
+    <Card className="border-l-[6px] border-l-teal-600 bg-gradient-to-br from-background to-muted/30">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">Daily Operations Briefing</CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -78,10 +78,22 @@ export function DailyBriefingCard() {
       <CardContent>
         {state === "idle" && (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Synthesizes census, capacity, and risk-flag data into 4 action items.
-            </p>
-            <Button onClick={generate} size="sm">
+            <div className="space-y-1.5">
+              {[
+                "Identifies facilities operating over capacity and the actions needed",
+                "Surfaces authorization lapses and payor coordination priorities",
+                "Highlights high-severity clinical flags requiring case manager attention",
+              ].map((preview, i) => (
+                <p key={i} className="text-sm text-slate-400 dark:text-slate-600 leading-relaxed">
+                  • {preview}
+                </p>
+              ))}
+            </div>
+            <Button
+              onClick={generate}
+              size="sm"
+              className="bg-teal-600 hover:bg-teal-700 text-white font-medium"
+            >
               Generate today&apos;s briefing
             </Button>
           </div>
