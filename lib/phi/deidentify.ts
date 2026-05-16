@@ -1,6 +1,32 @@
 import type { FacilityCensusRow } from "@/lib/db/queries/facilities";
 import type { OpenRiskFlagRow } from "@/lib/db/queries/riskFlags";
 
+// Auditable ICD-10 → diagnosis bucket mapping.
+// Only these codes are accepted; anything else maps to the catch-all.
+// Never send raw ICD-10 codes to Bedrock.
+const DIAGNOSIS_BUCKETS: Record<string, string> = {
+  "F10.20": "Alcohol Use Disorder, Moderate",
+  "F11.20": "Opioid Use Disorder, Moderate",
+  "F12.20": "Cannabis Use Disorder, Moderate",
+  "F14.20": "Cocaine Use Disorder, Moderate",
+  "F15.20": "Stimulant Use Disorder (other), Moderate",
+  "F19.20": "Other Psychoactive Substance Use Disorder, Moderate",
+};
+
+function mapDiagnosisCode(icd10: string): string {
+  return DIAGNOSIS_BUCKETS[icd10] ?? "Substance Use Disorder, Moderate";
+}
+
+export type SafeUrPayload = {
+  patientToken: string;
+  facilityName: string;
+  levelOfCare: string;
+  daysInTreatment: number;
+  diagnosisCategory: string;
+  insurancePayer: string;
+  activeFlags: Array<{ flagType: string; severity: string; daysOpen: number }>;
+};
+
 export type FlagType = "ama_risk" | "auth_lapse" | "missed_groups" | "failed_ua" | "no_aftercare";
 export type FlagSeverity = "high" | "medium" | "low";
 
@@ -18,6 +44,39 @@ export type SafeBriefingPayload = {
   authLapsesNext7Days: number;
   totalAdmitted: number;
 };
+
+export function buildUrNotePayload(input: {
+  patient: {
+    id: string;
+    facilityId: string;
+    admissionDate: Date | string;
+    levelOfCare: string;
+    primaryDiagnosisCode: string;
+    insurancePayer: string;
+  };
+  facility: { id: string; name: string };
+  flags: OpenRiskFlagRow[];
+}): SafeUrPayload {
+  const { patient, facility, flags } = input;
+
+  // Compute days in treatment server-side; never send the raw admission date.
+  const admissionMs = new Date(patient.admissionDate).getTime();
+  const daysInTreatment = Math.max(1, Math.floor((Date.now() - admissionMs) / (1000 * 60 * 60 * 24)));
+
+  return {
+    patientToken: patient.id.slice(0, 12),
+    facilityName: facility.name,
+    levelOfCare: patient.levelOfCare,
+    daysInTreatment,
+    diagnosisCategory: mapDiagnosisCode(patient.primaryDiagnosisCode),
+    insurancePayer: patient.insurancePayer,
+    activeFlags: flags.map((f) => ({
+      flagType: f.flagType,
+      severity: f.severity,
+      daysOpen: Math.max(1, Math.floor((Date.now() - new Date(f.createdAt).getTime()) / (1000 * 60 * 60 * 24))),
+    })),
+  };
+}
 
 export function buildDailyBriefingPayload(
   census: FacilityCensusRow[],
