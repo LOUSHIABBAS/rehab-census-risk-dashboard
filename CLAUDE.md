@@ -83,6 +83,26 @@ schema.prisma           # Prisma schema (Facility, Patient, Encounter, RiskFlag)
 migrations/             # Generated SQL Server DDL migrations
 
 
+## Deployment
+
+Hosted on Railway (Hobby plan) with auto-deploys on push to main.
+
+### Required environment variables (set in Railway Variables tab)
+- `DATABASE_URL` — Azure SQL connection string in Prisma format
+- `PORT` — `3000` (overrides Railpack's default of 8080; matches Railway's networking config)
+- `HOSTNAME` — `0.0.0.0` (binds to all interfaces, not just localhost — required inside containers)
+
+### Azure SQL firewall
+The Azure SQL server allows `0.0.0.0`–`255.255.255.255` for demo purposes only.
+All data in the DB is synthetic (no real PHI by design), so the trade-off is acceptable for a portfolio demo.
+Real production would use Azure Private Link / VNet integration instead.
+
+### Cold-start behavior
+Azure SQL Serverless auto-pauses after 1 hour idle. First request after a pause takes 30–60 seconds while the DB warms up. The app handles this via `app/loading.tsx` with an explainer message; subsequent requests are fast.
+
+### CI gate
+Railway is configured with "Wait for CI" enabled — deployments only trigger after GitHub Actions CI passes green on `main`.
+
 ## Working Agreements with Claude Code
 
 - Before editing files, check the existing patterns in nearby code
