@@ -36,6 +36,7 @@ export default async function Home() {
           label="Open Risk Flags"
           value={stats.openRiskFlagCount}
           subtle="unresolved"
+          href="/risk-flags"
         />
         <KpiCard
           label="Avg Occupancy"
