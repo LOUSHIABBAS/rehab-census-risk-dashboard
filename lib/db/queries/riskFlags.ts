@@ -8,13 +8,15 @@ export async function listOpenRiskFlags(facilityId?: string) {
   const flags = await prisma.riskFlag.findMany({
     where: {
       resolved: false,
-      ...(facilityId
-        ? { patient: { facilityId } }
-        : {}),
+      ...(facilityId ? { patient: { facilityId } } : {}),
     },
     include: {
       patient: {
-        select: { id: true, facilityId: true },
+        select: {
+          id: true,
+          facilityId: true,
+          facility: { select: { id: true, name: true } },
+        },
       },
     },
     orderBy: [{ createdAt: "desc" }],

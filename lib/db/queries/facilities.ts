@@ -1,6 +1,13 @@
 import { prisma } from "@/lib/db/client";
 import { listOpenRiskFlags } from "@/lib/db/queries/riskFlags";
 
+export async function listFacilities(): Promise<{ id: string; name: string }[]> {
+  return prisma.facility.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+}
+
 export type FacilityCensusRow = Awaited<ReturnType<typeof getFacilityCensus>>[number];
 export type DashboardStats = Awaited<ReturnType<typeof getDashboardStats>>;
 
